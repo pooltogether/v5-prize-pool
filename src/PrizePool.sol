@@ -238,7 +238,8 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
     /// @notice Returns the start time of the draw for the next successful completeAndStartNextDraw
     function _nextDrawStartsAt() internal view returns (uint64) {
         if (lastCompletedDrawId != 0) {
-            return lastCompletedDrawStartedAt_ + drawPeriodSeconds;
+            uint16 drawsSinceCompleted = _nextDrawId() - lastCompletedDrawId;
+            return lastCompletedDrawStartedAt_ + drawsSinceCompleted * drawPeriodSeconds;
         } else {
             return lastCompletedDrawStartedAt_;
         }
@@ -247,10 +248,30 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
     /// @notice Returns the time at which the next draw end.
     function _nextDrawEndsAt() internal view returns (uint64) {
         if (lastCompletedDrawId != 0) {
-            return lastCompletedDrawStartedAt_ + 2 * drawPeriodSeconds;
+            uint16 drawsSinceCompleted = _nextDrawId() - lastCompletedDrawId;
+            return lastCompletedDrawStartedAt_ + (drawsSinceCompleted + 1) * drawPeriodSeconds;
         } else {
             return lastCompletedDrawStartedAt_ + drawPeriodSeconds;
         }
+    }
+
+    /// @notice Returns the next draw ID, ignoring missed draws.
+    function _nextDrawId() internal view returns (uint16) {
+        if(lastCompletedDrawId == 0) {
+            return lastCompletedDrawId + 1;
+        } else {
+            uint64 timeSinceLastStart = uint64(block.timestamp - lastCompletedDrawStartedAt_);
+            if(timeSinceLastStart < drawPeriodSeconds * 2) {
+                return lastCompletedDrawId + 1;
+            } else {
+                return lastCompletedDrawId + uint16(timeSinceLastStart / drawPeriodSeconds) - 1; // one behind the current period
+            }
+        }
+    }
+
+    /// @notice Returns the next draw ID, ignoring missed draws.
+    function getNextDrawId() external view returns(uint16) {
+        return _nextDrawId();
     }
 
     function _computeNextNumberOfTiers(uint8 _numTiers) internal view returns (uint8) {
@@ -279,9 +300,10 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
             nextNumberOfTiers = _computeNextNumberOfTiers(numTiers);
         }
 
+        uint16 nextDrawId_ = _nextDrawId();
         uint64 nextDrawStartsAt_ = _nextDrawStartsAt();
 
-        _nextDraw(nextNumberOfTiers, uint96(_contributionsForDraw(lastCompletedDrawId+1)));
+        _nextDraw(nextNumberOfTiers, uint96(_contributionsForDraw(nextDrawId_)), _nextDrawId());
 
         _winningRandomNumber = winningRandomNumber_;
         claimCount = 0;
@@ -301,7 +323,7 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
         if (lastCompletedDrawId != 0) {
             nextNumberOfTiers = _computeNextNumberOfTiers(numTiers);
         }
-        (, uint104 newReserve, ) = _computeNewDistributions(numTiers, nextNumberOfTiers, uint96(_contributionsForDraw(lastCompletedDrawId+1)));
+        (uint104 newReserve, ) = _computeNewDistributions(numTiers, nextNumberOfTiers, uint96(_contributionsForDraw(_nextDrawId())));
         return newReserve;
     }
 

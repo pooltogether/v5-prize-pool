@@ -32,20 +32,20 @@ contract TieredLiquidityDistributorInvariants is Test {
 
     // Failure case regression test (2023-05-26)
     function testInvariantFailure_Case_2023_05_26() external {
-        distributor.nextDraw(3, 253012247290373118207);
-        distributor.nextDraw(2, 99152290762372054017);
-        distributor.nextDraw(255, 79228162514264337593543950333);
+        distributor.nextDraw(3, 253012247290373118207, 1);
+        distributor.nextDraw(2, 99152290762372054017, 2);
+        distributor.nextDraw(255, 79228162514264337593543950333, 3);
         distributor.consumeLiquidity(1);
         distributor.consumeLiquidity(0);
-        distributor.nextDraw(0, 2365);
-        distributor.nextDraw(4, 36387);
-        distributor.nextDraw(73, 486356342973499764);
+        distributor.nextDraw(0, 2365, 4);
+        distributor.nextDraw(4, 36387, 5);
+        distributor.nextDraw(73, 486356342973499764, 6);
         distributor.consumeLiquidity(174);
         distributor.consumeLiquidity(254);
-        distributor.nextDraw(5, 2335051495798885129312);
-        distributor.nextDraw(159, 543634559793817062402422965);
-        distributor.nextDraw(186, 3765046993999626249);
-        distributor.nextDraw(0, 196958881398058173458);
+        distributor.nextDraw(5, 2335051495798885129312, 7);
+        distributor.nextDraw(159, 543634559793817062402422965, 8);
+        distributor.nextDraw(186, 3765046993999626249, 9);
+        distributor.nextDraw(0, 196958881398058173458, 10);
         uint256 expected = distributor.totalAdded() - distributor.totalConsumed();
         assertApproxEqAbs(distributor.accountedLiquidity(), expected, expectedLiquidityDeltaRange(distributor.numberOfTiers()));
     }

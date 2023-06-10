@@ -150,14 +150,15 @@ contract TieredLiquidityDistributor {
     /// @notice Adjusts the number of tiers and distributes new liquidity
     /// @param _nextNumberOfTiers The new number of tiers. Must be greater than minimum
     /// @param _prizeTokenLiquidity The amount of fresh liquidity to distribute across the tiers and reserve
-    function _nextDraw(uint8 _nextNumberOfTiers, uint96 _prizeTokenLiquidity) internal {
+    function _nextDraw(uint8 _nextNumberOfTiers, uint96 _prizeTokenLiquidity, uint16 completedDrawId) internal {
+        require(completedDrawId > lastCompletedDrawId, "already completed");
         if(_nextNumberOfTiers < MINIMUM_NUMBER_OF_TIERS) {
             revert NumberOfTiersLessThanMinimum(_nextNumberOfTiers);
         }
 
         uint8 numTiers = numberOfTiers;
         UD60x18 _prizeTokenPerShare = fromUD34x4toUD60x18(prizeTokenPerShare);
-        (uint16 completedDrawId, uint104 newReserve, UD60x18 newPrizeTokenPerShare) = _computeNewDistributions(numTiers, _nextNumberOfTiers, _prizeTokenPerShare, _prizeTokenLiquidity);
+        (uint104 newReserve, UD60x18 newPrizeTokenPerShare) = _computeNewDistributions(numTiers, _nextNumberOfTiers, _prizeTokenPerShare, _prizeTokenLiquidity);
 
         // if expanding, need to reset the new tier
         if (_nextNumberOfTiers > numTiers) {
@@ -187,10 +188,9 @@ contract TieredLiquidityDistributor {
     /// @param _numberOfTiers The current number of tiers
     /// @param _nextNumberOfTiers The next number of tiers to use to compute distribution
     /// @param _prizeTokenLiquidity The amount of fresh liquidity to distribute across the tiers and reserve
-    /// @return completedDrawId The drawId that this is for
     /// @return newReserve The amount of liquidity that will be added to the reserve
     /// @return newPrizeTokenPerShare The new prize token per share
-    function _computeNewDistributions(uint8 _numberOfTiers, uint8 _nextNumberOfTiers, uint _prizeTokenLiquidity) internal view returns (uint16 completedDrawId, uint104 newReserve, UD60x18 newPrizeTokenPerShare) {
+    function _computeNewDistributions(uint8 _numberOfTiers, uint8 _nextNumberOfTiers, uint _prizeTokenLiquidity) internal view returns (uint104 newReserve, UD60x18 newPrizeTokenPerShare) {
         return _computeNewDistributions(_numberOfTiers, _nextNumberOfTiers, fromUD34x4toUD60x18(prizeTokenPerShare), _prizeTokenLiquidity);
     }
 
@@ -199,11 +199,9 @@ contract TieredLiquidityDistributor {
     /// @param _nextNumberOfTiers The next number of tiers to use to compute distribution
     /// @param _currentPrizeTokenPerShare The current prize token per share
     /// @param _prizeTokenLiquidity The amount of fresh liquidity to distribute across the tiers and reserve
-    /// @return completedDrawId The drawId that this is for
     /// @return newReserve The amount of liquidity that will be added to the reserve
     /// @return newPrizeTokenPerShare The new prize token per share
-    function _computeNewDistributions(uint8 _numberOfTiers, uint8 _nextNumberOfTiers, UD60x18 _currentPrizeTokenPerShare, uint _prizeTokenLiquidity) internal view returns (uint16 completedDrawId, uint104 newReserve, UD60x18 newPrizeTokenPerShare) {
-        completedDrawId = lastCompletedDrawId + 1;
+    function _computeNewDistributions(uint8 _numberOfTiers, uint8 _nextNumberOfTiers, UD60x18 _currentPrizeTokenPerShare, uint _prizeTokenLiquidity) internal view returns (uint104 newReserve, UD60x18 newPrizeTokenPerShare) {
         uint256 totalShares = _getTotalShares(_nextNumberOfTiers);
         UD60x18 deltaPrizeTokensPerShare = toUD60x18(_prizeTokenLiquidity).div(toUD60x18(totalShares));
 
@@ -353,12 +351,6 @@ contract TieredLiquidityDistributor {
         }
         UD60x18 delta = _prizeTokenPerShare.sub(_tierPrizeTokenPerShare);
         return delta.mul(toUD60x18(_shares));
-    }
-
-    /// @notice Retrieves the id of the next draw to be completed.
-    /// @return The next draw id
-    function getNextDrawId() external view returns (uint256) {
-        return uint256(lastCompletedDrawId) + 1;
     }
 
     /// @notice Estimates the number of prizes that will be awarded

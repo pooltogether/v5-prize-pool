@@ -35,44 +35,44 @@ contract TieredLiquidityDistributorTest is Test {
 
     function testNextDraw_invalid_num_tiers() public {
         vm.expectRevert(abi.encodeWithSelector(NumberOfTiersLessThanMinimum.selector, 1));
-        distributor.nextDraw(1, 100);
+        distributor.nextDraw(1, 100, 1);
     }
 
     function testRemainingTierLiquidity() public {
-        distributor.nextDraw(2, 220e18);
+        distributor.nextDraw(2, 220e18, 1);
         assertEq(distributor.remainingTierLiquidity(0), 100e18);
         assertEq(distributor.remainingTierLiquidity(1), 100e18);
         assertEq(distributor.remainingTierLiquidity(2), 10e18);
     }
 
     function testConsumeLiquidity_partial() public {
-        distributor.nextDraw(2, 220e18);
+        distributor.nextDraw(2, 220e18, 1);
         distributor.consumeLiquidity(1, 50e18); // consume full liq for tier 1
         assertEq(distributor.remainingTierLiquidity(1), 50e18);
     }
 
     function testConsumeLiquidity_full() public {
-        distributor.nextDraw(2, 220e18);
+        distributor.nextDraw(2, 220e18, 1);
         distributor.consumeLiquidity(1, 100e18); // consume full liq for tier 1
         assertEq(distributor.remainingTierLiquidity(1), 0);
     }
 
     function testConsumeLiquidity_and_empty_reserve() public {
-        distributor.nextDraw(2, 220e18); // reserve should be 10e18
+        distributor.nextDraw(2, 220e18, 1); // reserve should be 10e18
         distributor.consumeLiquidity(1, 110e18); // consume full liq for tier 1 and reserve
         assertEq(distributor.remainingTierLiquidity(1), 0);
         assertEq(distributor.reserve(), 0);
     }
 
     function testConsumeLiquidity_and_partial_reserve() public {
-        distributor.nextDraw(2, 220e18); // reserve should be 10e18
+        distributor.nextDraw(2, 220e18, 1); // reserve should be 10e18
         distributor.consumeLiquidity(1, 105e18); // consume full liq for tier 1 and reserve
         assertEq(distributor.remainingTierLiquidity(1), 0);
         assertEq(distributor.reserve(), 5e18);
     }
 
     function testConsumeLiquidity_insufficient() public {
-        distributor.nextDraw(2, 220e18); // reserve should be 10e18
+        distributor.nextDraw(2, 220e18, 1); // reserve should be 10e18
         vm.expectRevert(abi.encodeWithSelector(InsufficientLiquidity.selector, 120e18));
         distributor.consumeLiquidity(1, 120e18);
     }

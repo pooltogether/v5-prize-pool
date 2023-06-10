@@ -244,6 +244,37 @@ contract PrizePoolTest is Test {
         assertEq(nextDrawId, 1);
     }
 
+    function testGetNextDrawId_NotFirst() public {
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds); // at draw period 2
+        prizePool.completeAndStartNextDraw(winningRandomNumber);
+        uint256 nextDrawId = prizePool.getNextDrawId();
+        assertEq(nextDrawId, 2);
+    }
+
+    function testGetNextDrawId_MissedDraw() public {
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds); // at draw period 2
+        prizePool.completeAndStartNextDraw(winningRandomNumber);
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds + drawPeriodSeconds + drawPeriodSeconds); // at draw period 4
+        uint256 nextDrawId = prizePool.getNextDrawId();
+        assertEq(nextDrawId, 3);
+    }
+
+    function testGetNextDrawId_MissedDraw_MiddleOfPeriod() public {
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds); // at draw period 2
+        prizePool.completeAndStartNextDraw(winningRandomNumber);
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds + drawPeriodSeconds + drawPeriodSeconds + drawPeriodSeconds / 2); // in middle of draw period 4
+        uint256 nextDrawId = prizePool.getNextDrawId();
+        assertEq(nextDrawId, 3);
+    }
+
+    function testGetNextDrawId_Missed2Draw() public {
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds); // at draw period 2
+        prizePool.completeAndStartNextDraw(winningRandomNumber);
+        vm.warp(lastCompletedDrawStartedAt + drawPeriodSeconds + drawPeriodSeconds + drawPeriodSeconds + drawPeriodSeconds); // at draw period 5
+        uint256 nextDrawId = prizePool.getNextDrawId();
+        assertEq(nextDrawId, 4);
+    }
+
     function testCompleteAndStartNextDraw_notElapsed_atStart() public {
         vm.warp(lastCompletedDrawStartedAt);
         vm.expectRevert("not elapsed");
