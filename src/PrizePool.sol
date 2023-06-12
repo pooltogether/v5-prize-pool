@@ -303,7 +303,7 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
         uint16 nextDrawId_ = _nextDrawId();
         uint64 nextDrawStartsAt_ = _nextDrawStartsAt();
 
-        _nextDraw(nextNumberOfTiers, uint96(_contributionsForDraw(nextDrawId_)), _nextDrawId());
+        _nextDraw(nextNumberOfTiers, uint96(_contributionsForDraw(nextDrawId_)), nextDrawId_);
 
         _winningRandomNumber = winningRandomNumber_;
         claimCount = 0;
