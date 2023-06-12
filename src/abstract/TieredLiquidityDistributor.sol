@@ -150,8 +150,9 @@ contract TieredLiquidityDistributor {
     /// @notice Adjusts the number of tiers and distributes new liquidity
     /// @param _nextNumberOfTiers The new number of tiers. Must be greater than minimum
     /// @param _prizeTokenLiquidity The amount of fresh liquidity to distribute across the tiers and reserve
-    function _nextDraw(uint8 _nextNumberOfTiers, uint96 _prizeTokenLiquidity, uint16 completedDrawId) internal {
-        require(completedDrawId > lastCompletedDrawId, "already completed");
+    /// @param _completedDrawId The ID of the draw to complete
+    function _nextDraw(uint8 _nextNumberOfTiers, uint96 _prizeTokenLiquidity, uint16 _completedDrawId) internal {
+        require(_completedDrawId > lastCompletedDrawId, "already completed");
         if(_nextNumberOfTiers < MINIMUM_NUMBER_OF_TIERS) {
             revert NumberOfTiersLessThanMinimum(_nextNumberOfTiers);
         }
@@ -164,7 +165,7 @@ contract TieredLiquidityDistributor {
         if (_nextNumberOfTiers > numTiers) {
             for (uint8 i = numTiers; i < _nextNumberOfTiers; i++) {
                 _tiers[i] = Tier({
-                    drawId: completedDrawId,
+                    drawId: _completedDrawId,
                     prizeTokenPerShare: prizeTokenPerShare,
                     prizeSize: uint96(_computePrizeSize(i, _nextNumberOfTiers, _prizeTokenPerShare, newPrizeTokenPerShare))
                 });
@@ -173,14 +174,14 @@ contract TieredLiquidityDistributor {
 
         // Set canary tier
         _tiers[_nextNumberOfTiers] = Tier({
-            drawId: completedDrawId,
+            drawId: _completedDrawId,
             prizeTokenPerShare: prizeTokenPerShare,
             prizeSize: uint96(_computePrizeSize(_nextNumberOfTiers, _nextNumberOfTiers, _prizeTokenPerShare, newPrizeTokenPerShare))
         });
 
         prizeTokenPerShare = fromUD60x18toUD34x4(newPrizeTokenPerShare);
         numberOfTiers = _nextNumberOfTiers;
-        lastCompletedDrawId = completedDrawId;
+        lastCompletedDrawId = _completedDrawId;
         _reserve += newReserve;
     }
 
