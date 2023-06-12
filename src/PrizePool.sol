@@ -245,7 +245,7 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
         }
     }
 
-    /// @notice Returns the time at which the next draw end.
+    /// @notice Returns the time at which the next draw ends.
     function _nextDrawEndsAt() internal view returns (uint64) {
         if (lastCompletedDrawId != 0) {
             uint16 drawsSinceCompleted = _nextDrawId() - lastCompletedDrawId;
@@ -258,7 +258,7 @@ contract PrizePool is Manageable, Multicall, TieredLiquidityDistributor {
     /// @notice Returns the next draw ID, ignoring missed draws.
     function _nextDrawId() internal view returns (uint16) {
         if(lastCompletedDrawId == 0) {
-            return lastCompletedDrawId + 1;
+            return 1;
         } else {
             uint64 timeSinceLastStart = uint64(block.timestamp - lastCompletedDrawStartedAt_);
             if(timeSinceLastStart < drawPeriodSeconds * 2) {
