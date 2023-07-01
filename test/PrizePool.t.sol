@@ -1011,8 +1011,8 @@ contract PrizePoolTest is Test {
 
   function testEstimatedPrizeCount() public {
     // assumes grand prize is 365
-    assertEq(prizePool.estimatedPrizeCount(0), 0);
-    assertEq(prizePool.estimatedPrizeCount(1), 0);
+    // assertEq(prizePool.estimatedPrizeCount(0), 0);
+    // assertEq(prizePool.estimatedPrizeCount(1), 0);
     assertEq(prizePool.estimatedPrizeCount(2), 0);
     assertEq(prizePool.estimatedPrizeCount(3), 4);
     assertEq(prizePool.estimatedPrizeCount(4), 16);

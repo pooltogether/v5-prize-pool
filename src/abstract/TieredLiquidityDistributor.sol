@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.17;
 
+import { console2 } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
+
 import { E, SD59x18, sd, toSD59x18, fromSD59x18 } from "prb-math/SD59x18.sol";
 import { UD60x18, ud, toUD60x18, fromUD60x18, intoSD59x18 } from "prb-math/UD60x18.sol";
 import { UD2x18, intoUD60x18 } from "prb-math/UD2x18.sol";
@@ -52,154 +55,590 @@ contract TieredLiquidityDistributor {
   uint16 internal constant GRAND_PRIZE_PERIOD_DRAWS = 365;
 
   /// @notice The estimated number of prizes given X tiers.
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_2_TIERS = 4;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_3_TIERS = 16;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_4_TIERS = 66;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_5_TIERS = 270;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_6_TIERS = 1108;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_7_TIERS = 4517;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_8_TIERS = 18358;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_9_TIERS = 74435;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_10_TIERS = 301239;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_11_TIERS = 1217266;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_12_TIERS = 4912619;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_13_TIERS = 19805536;
-  uint32 internal constant ESTIMATED_PRIZES_PER_DRAW_FOR_14_TIERS = 79777187;
+  function e2() external pure returns (uint256) {
+    return 4;
+  }
+
+  function e3() external pure returns (uint256) {
+    return 16;
+  }
+
+  function e4() external pure returns (uint256) {
+    return 66;
+  }
+
+  function e5() external pure returns (uint256) {
+    return 270;
+  }
+
+  function e6() external pure returns (uint256) {
+    return 1108;
+  }
+
+  function e7() external pure returns (uint256) {
+    return 4517;
+  }
+
+  function e8() external pure returns (uint256) {
+    return 18358;
+  }
+
+  function e9() external pure returns (uint256) {
+    return 74435;
+  }
+
+  function e10() external pure returns (uint256) {
+    return 301239;
+  }
+
+  function e11() external pure returns (uint256) {
+    return 1217266;
+  }
+
+  function e12() external pure returns (uint256) {
+    return 4912619;
+  }
+
+  function e13() external pure returns (uint256) {
+    return 19805536;
+  }
+
+  function e14() external pure returns (uint256) {
+    return 79777187;
+  }
 
   /// @notice The odds for each tier and number of tiers pair.
-  SD59x18 internal constant TIER_ODDS_0_3 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_3 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_2_3 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_4 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_4 = SD59x18.wrap(19579642462506911);
-  SD59x18 internal constant TIER_ODDS_2_4 = SD59x18.wrap(139927275620255366);
-  SD59x18 internal constant TIER_ODDS_3_4 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_5 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_5 = SD59x18.wrap(11975133168707466);
-  SD59x18 internal constant TIER_ODDS_2_5 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_3_5 = SD59x18.wrap(228784597949733865);
-  SD59x18 internal constant TIER_ODDS_4_5 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_6 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_6 = SD59x18.wrap(8915910667410451);
-  SD59x18 internal constant TIER_ODDS_2_6 = SD59x18.wrap(29015114005673871);
-  SD59x18 internal constant TIER_ODDS_3_6 = SD59x18.wrap(94424100034951094);
-  SD59x18 internal constant TIER_ODDS_4_6 = SD59x18.wrap(307285046878222004);
-  SD59x18 internal constant TIER_ODDS_5_6 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_7 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_7 = SD59x18.wrap(7324128348251604);
-  SD59x18 internal constant TIER_ODDS_2_7 = SD59x18.wrap(19579642462506911);
-  SD59x18 internal constant TIER_ODDS_3_7 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_4_7 = SD59x18.wrap(139927275620255366);
-  SD59x18 internal constant TIER_ODDS_5_7 = SD59x18.wrap(374068544013333694);
-  SD59x18 internal constant TIER_ODDS_6_7 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_8 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_8 = SD59x18.wrap(6364275529026907);
-  SD59x18 internal constant TIER_ODDS_2_8 = SD59x18.wrap(14783961098420314);
-  SD59x18 internal constant TIER_ODDS_3_8 = SD59x18.wrap(34342558671878193);
-  SD59x18 internal constant TIER_ODDS_4_8 = SD59x18.wrap(79776409602255901);
-  SD59x18 internal constant TIER_ODDS_5_8 = SD59x18.wrap(185317453770221528);
-  SD59x18 internal constant TIER_ODDS_6_8 = SD59x18.wrap(430485137687959592);
-  SD59x18 internal constant TIER_ODDS_7_8 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_9 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_9 = SD59x18.wrap(5727877794074876);
-  SD59x18 internal constant TIER_ODDS_2_9 = SD59x18.wrap(11975133168707466);
-  SD59x18 internal constant TIER_ODDS_3_9 = SD59x18.wrap(25036116265717087);
-  SD59x18 internal constant TIER_ODDS_4_9 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_5_9 = SD59x18.wrap(109430951602859902);
-  SD59x18 internal constant TIER_ODDS_6_9 = SD59x18.wrap(228784597949733865);
-  SD59x18 internal constant TIER_ODDS_7_9 = SD59x18.wrap(478314329651259628);
-  SD59x18 internal constant TIER_ODDS_8_9 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_10 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_10 = SD59x18.wrap(5277233889074595);
-  SD59x18 internal constant TIER_ODDS_2_10 = SD59x18.wrap(10164957094799045);
-  SD59x18 internal constant TIER_ODDS_3_10 = SD59x18.wrap(19579642462506911);
-  SD59x18 internal constant TIER_ODDS_4_10 = SD59x18.wrap(37714118749773489);
-  SD59x18 internal constant TIER_ODDS_5_10 = SD59x18.wrap(72644572330454226);
-  SD59x18 internal constant TIER_ODDS_6_10 = SD59x18.wrap(139927275620255366);
-  SD59x18 internal constant TIER_ODDS_7_10 = SD59x18.wrap(269526570731818992);
-  SD59x18 internal constant TIER_ODDS_8_10 = SD59x18.wrap(519159484871285957);
-  SD59x18 internal constant TIER_ODDS_9_10 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_11 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_11 = SD59x18.wrap(4942383282734483);
-  SD59x18 internal constant TIER_ODDS_2_11 = SD59x18.wrap(8915910667410451);
-  SD59x18 internal constant TIER_ODDS_3_11 = SD59x18.wrap(16084034459031666);
-  SD59x18 internal constant TIER_ODDS_4_11 = SD59x18.wrap(29015114005673871);
-  SD59x18 internal constant TIER_ODDS_5_11 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_6_11 = SD59x18.wrap(94424100034951094);
-  SD59x18 internal constant TIER_ODDS_7_11 = SD59x18.wrap(170338234127496669);
-  SD59x18 internal constant TIER_ODDS_8_11 = SD59x18.wrap(307285046878222004);
-  SD59x18 internal constant TIER_ODDS_9_11 = SD59x18.wrap(554332974734700411);
-  SD59x18 internal constant TIER_ODDS_10_11 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_12 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_12 = SD59x18.wrap(4684280039134314);
-  SD59x18 internal constant TIER_ODDS_2_12 = SD59x18.wrap(8009005012036743);
-  SD59x18 internal constant TIER_ODDS_3_12 = SD59x18.wrap(13693494143591795);
-  SD59x18 internal constant TIER_ODDS_4_12 = SD59x18.wrap(23412618868232833);
-  SD59x18 internal constant TIER_ODDS_5_12 = SD59x18.wrap(40030011078337707);
-  SD59x18 internal constant TIER_ODDS_6_12 = SD59x18.wrap(68441800379112721);
-  SD59x18 internal constant TIER_ODDS_7_12 = SD59x18.wrap(117019204165776974);
-  SD59x18 internal constant TIER_ODDS_8_12 = SD59x18.wrap(200075013628233217);
-  SD59x18 internal constant TIER_ODDS_9_12 = SD59x18.wrap(342080698323914461);
-  SD59x18 internal constant TIER_ODDS_10_12 = SD59x18.wrap(584876652230121477);
-  SD59x18 internal constant TIER_ODDS_11_12 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_13 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_13 = SD59x18.wrap(4479520628784180);
-  SD59x18 internal constant TIER_ODDS_2_13 = SD59x18.wrap(7324128348251604);
-  SD59x18 internal constant TIER_ODDS_3_13 = SD59x18.wrap(11975133168707466);
-  SD59x18 internal constant TIER_ODDS_4_13 = SD59x18.wrap(19579642462506911);
-  SD59x18 internal constant TIER_ODDS_5_13 = SD59x18.wrap(32013205494981721);
-  SD59x18 internal constant TIER_ODDS_6_13 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_7_13 = SD59x18.wrap(85581121447732876);
-  SD59x18 internal constant TIER_ODDS_8_13 = SD59x18.wrap(139927275620255366);
-  SD59x18 internal constant TIER_ODDS_9_13 = SD59x18.wrap(228784597949733866);
-  SD59x18 internal constant TIER_ODDS_10_13 = SD59x18.wrap(374068544013333694);
-  SD59x18 internal constant TIER_ODDS_11_13 = SD59x18.wrap(611611432212751966);
-  SD59x18 internal constant TIER_ODDS_12_13 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_14 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_14 = SD59x18.wrap(4313269422986724);
-  SD59x18 internal constant TIER_ODDS_2_14 = SD59x18.wrap(6790566987074365);
-  SD59x18 internal constant TIER_ODDS_3_14 = SD59x18.wrap(10690683906783196);
-  SD59x18 internal constant TIER_ODDS_4_14 = SD59x18.wrap(16830807002169641);
-  SD59x18 internal constant TIER_ODDS_5_14 = SD59x18.wrap(26497468900426949);
-  SD59x18 internal constant TIER_ODDS_6_14 = SD59x18.wrap(41716113674084931);
-  SD59x18 internal constant TIER_ODDS_7_14 = SD59x18.wrap(65675485708038160);
-  SD59x18 internal constant TIER_ODDS_8_14 = SD59x18.wrap(103395763485663166);
-  SD59x18 internal constant TIER_ODDS_9_14 = SD59x18.wrap(162780431564813557);
-  SD59x18 internal constant TIER_ODDS_10_14 = SD59x18.wrap(256272288217119098);
-  SD59x18 internal constant TIER_ODDS_11_14 = SD59x18.wrap(403460570024895441);
-  SD59x18 internal constant TIER_ODDS_12_14 = SD59x18.wrap(635185461125249183);
-  SD59x18 internal constant TIER_ODDS_13_14 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_15 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_15 = SD59x18.wrap(4175688124417637);
-  SD59x18 internal constant TIER_ODDS_2_15 = SD59x18.wrap(6364275529026907);
-  SD59x18 internal constant TIER_ODDS_3_15 = SD59x18.wrap(9699958857683993);
-  SD59x18 internal constant TIER_ODDS_4_15 = SD59x18.wrap(14783961098420314);
-  SD59x18 internal constant TIER_ODDS_5_15 = SD59x18.wrap(22532621938542004);
-  SD59x18 internal constant TIER_ODDS_6_15 = SD59x18.wrap(34342558671878193);
-  SD59x18 internal constant TIER_ODDS_7_15 = SD59x18.wrap(52342392259021369);
-  SD59x18 internal constant TIER_ODDS_8_15 = SD59x18.wrap(79776409602255901);
-  SD59x18 internal constant TIER_ODDS_9_15 = SD59x18.wrap(121589313257458259);
-  SD59x18 internal constant TIER_ODDS_10_15 = SD59x18.wrap(185317453770221528);
-  SD59x18 internal constant TIER_ODDS_11_15 = SD59x18.wrap(282447180198804430);
-  SD59x18 internal constant TIER_ODDS_12_15 = SD59x18.wrap(430485137687959592);
-  SD59x18 internal constant TIER_ODDS_13_15 = SD59x18.wrap(656113662171395111);
-  SD59x18 internal constant TIER_ODDS_14_15 = SD59x18.wrap(1000000000000000000);
-  SD59x18 internal constant TIER_ODDS_0_16 = SD59x18.wrap(2739726027397260);
-  SD59x18 internal constant TIER_ODDS_1_16 = SD59x18.wrap(4060005854625059);
-  SD59x18 internal constant TIER_ODDS_2_16 = SD59x18.wrap(6016531351950262);
-  SD59x18 internal constant TIER_ODDS_3_16 = SD59x18.wrap(8915910667410451);
-  SD59x18 internal constant TIER_ODDS_4_16 = SD59x18.wrap(13212507070785166);
-  SD59x18 internal constant TIER_ODDS_5_16 = SD59x18.wrap(19579642462506911);
-  SD59x18 internal constant TIER_ODDS_6_16 = SD59x18.wrap(29015114005673871);
-  SD59x18 internal constant TIER_ODDS_7_16 = SD59x18.wrap(42997559448512061);
-  SD59x18 internal constant TIER_ODDS_8_16 = SD59x18.wrap(63718175229875027);
-  SD59x18 internal constant TIER_ODDS_9_16 = SD59x18.wrap(94424100034951094);
-  SD59x18 internal constant TIER_ODDS_10_16 = SD59x18.wrap(139927275620255366);
-  SD59x18 internal constant TIER_ODDS_11_16 = SD59x18.wrap(207358528757589475);
-  SD59x18 internal constant TIER_ODDS_12_16 = SD59x18.wrap(307285046878222004);
-  SD59x18 internal constant TIER_ODDS_13_16 = SD59x18.wrap(455366367617975795);
-  SD59x18 internal constant TIER_ODDS_14_16 = SD59x18.wrap(674808393262840052);
-  SD59x18 internal constant TIER_ODDS_15_16 = SD59x18.wrap(1000000000000000000);
+  function t03() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t13() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t23() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t04() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t14() external pure returns (uint256) {
+    return 19579642462506911;
+  }
+
+  function t24() external pure returns (uint256) {
+    return 139927275620255366;
+  }
+
+  function t34() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t05() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t15() external pure returns (uint256) {
+    return 11975133168707466;
+  }
+
+  function t25() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t35() external pure returns (uint256) {
+    return 228784597949733865;
+  }
+
+  function t45() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t06() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t16() external pure returns (uint256) {
+    return 8915910667410451;
+  }
+
+  function t26() external pure returns (uint256) {
+    return 29015114005673871;
+  }
+
+  function t36() external pure returns (uint256) {
+    return 94424100034951094;
+  }
+
+  function t46() external pure returns (uint256) {
+    return 307285046878222004;
+  }
+
+  function t56() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t07() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t17() external pure returns (uint256) {
+    return 7324128348251604;
+  }
+
+  function t27() external pure returns (uint256) {
+    return 19579642462506911;
+  }
+
+  function t37() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t47() external pure returns (uint256) {
+    return 139927275620255366;
+  }
+
+  function t57() external pure returns (uint256) {
+    return 374068544013333694;
+  }
+
+  function t67() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t08() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t18() external pure returns (uint256) {
+    return 6364275529026907;
+  }
+
+  function t28() external pure returns (uint256) {
+    return 14783961098420314;
+  }
+
+  function t38() external pure returns (uint256) {
+    return 34342558671878193;
+  }
+
+  function t48() external pure returns (uint256) {
+    return 79776409602255901;
+  }
+
+  function t58() external pure returns (uint256) {
+    return 185317453770221528;
+  }
+
+  function t68() external pure returns (uint256) {
+    return 430485137687959592;
+  }
+
+  function t78() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t09() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t19() external pure returns (uint256) {
+    return 5727877794074876;
+  }
+
+  function t29() external pure returns (uint256) {
+    return 11975133168707466;
+  }
+
+  function t39() external pure returns (uint256) {
+    return 25036116265717087;
+  }
+
+  function t49() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t59() external pure returns (uint256) {
+    return 109430951602859902;
+  }
+
+  function t69() external pure returns (uint256) {
+    return 228784597949733865;
+  }
+
+  function t79() external pure returns (uint256) {
+    return 478314329651259628;
+  }
+
+  function t89() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t010() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t110() external pure returns (uint256) {
+    return 5277233889074595;
+  }
+
+  function t210() external pure returns (uint256) {
+    return 10164957094799045;
+  }
+
+  function t310() external pure returns (uint256) {
+    return 19579642462506911;
+  }
+
+  function t410() external pure returns (uint256) {
+    return 37714118749773489;
+  }
+
+  function t510() external pure returns (uint256) {
+    return 72644572330454226;
+  }
+
+  function t610() external pure returns (uint256) {
+    return 139927275620255366;
+  }
+
+  function t710() external pure returns (uint256) {
+    return 269526570731818992;
+  }
+
+  function t810() external pure returns (uint256) {
+    return 519159484871285957;
+  }
+
+  function t910() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t011() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t111() external pure returns (uint256) {
+    return 4942383282734483;
+  }
+
+  function t211() external pure returns (uint256) {
+    return 8915910667410451;
+  }
+
+  function t311() external pure returns (uint256) {
+    return 16084034459031666;
+  }
+
+  function t411() external pure returns (uint256) {
+    return 29015114005673871;
+  }
+
+  function t511() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t611() external pure returns (uint256) {
+    return 94424100034951094;
+  }
+
+  function t711() external pure returns (uint256) {
+    return 170338234127496669;
+  }
+
+  function t811() external pure returns (uint256) {
+    return 307285046878222004;
+  }
+
+  function t911() external pure returns (uint256) {
+    return 554332974734700411;
+  }
+
+  function t1011() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t012() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t112() external pure returns (uint256) {
+    return 4684280039134314;
+  }
+
+  function t212() external pure returns (uint256) {
+    return 8009005012036743;
+  }
+
+  function t312() external pure returns (uint256) {
+    return 13693494143591795;
+  }
+
+  function t412() external pure returns (uint256) {
+    return 23412618868232833;
+  }
+
+  function t512() external pure returns (uint256) {
+    return 40030011078337707;
+  }
+
+  function t612() external pure returns (uint256) {
+    return 68441800379112721;
+  }
+
+  function t712() external pure returns (uint256) {
+    return 117019204165776974;
+  }
+
+  function t812() external pure returns (uint256) {
+    return 200075013628233217;
+  }
+
+  function t912() external pure returns (uint256) {
+    return 342080698323914461;
+  }
+
+  function t1012() external pure returns (uint256) {
+    return 584876652230121477;
+  }
+
+  function t1112() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t013() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t113() external pure returns (uint256) {
+    return 4479520628784180;
+  }
+
+  function t213() external pure returns (uint256) {
+    return 7324128348251604;
+  }
+
+  function t313() external pure returns (uint256) {
+    return 11975133168707466;
+  }
+
+  function t413() external pure returns (uint256) {
+    return 19579642462506911;
+  }
+
+  function t513() external pure returns (uint256) {
+    return 32013205494981721;
+  }
+
+  function t613() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t713() external pure returns (uint256) {
+    return 85581121447732876;
+  }
+
+  function t813() external pure returns (uint256) {
+    return 139927275620255366;
+  }
+
+  function t913() external pure returns (uint256) {
+    return 228784597949733866;
+  }
+
+  function t1013() external pure returns (uint256) {
+    return 374068544013333694;
+  }
+
+  function t1113() external pure returns (uint256) {
+    return 611611432212751966;
+  }
+
+  function t1213() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t014() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t114() external pure returns (uint256) {
+    return 4313269422986724;
+  }
+
+  function t214() external pure returns (uint256) {
+    return 6790566987074365;
+  }
+
+  function t314() external pure returns (uint256) {
+    return 10690683906783196;
+  }
+
+  function t414() external pure returns (uint256) {
+    return 16830807002169641;
+  }
+
+  function t514() external pure returns (uint256) {
+    return 26497468900426949;
+  }
+
+  function t614() external pure returns (uint256) {
+    return 41716113674084931;
+  }
+
+  function t714() external pure returns (uint256) {
+    return 65675485708038160;
+  }
+
+  function t814() external pure returns (uint256) {
+    return 103395763485663166;
+  }
+
+  function t914() external pure returns (uint256) {
+    return 162780431564813557;
+  }
+
+  function t1014() external pure returns (uint256) {
+    return 256272288217119098;
+  }
+
+  function t1114() external pure returns (uint256) {
+    return 403460570024895441;
+  }
+
+  function t1214() external pure returns (uint256) {
+    return 635185461125249183;
+  }
+
+  function t1314() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t015() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t115() external pure returns (uint256) {
+    return 4175688124417637;
+  }
+
+  function t215() external pure returns (uint256) {
+    return 6364275529026907;
+  }
+
+  function t315() external pure returns (uint256) {
+    return 9699958857683993;
+  }
+
+  function t415() external pure returns (uint256) {
+    return 14783961098420314;
+  }
+
+  function t515() external pure returns (uint256) {
+    return 22532621938542004;
+  }
+
+  function t615() external pure returns (uint256) {
+    return 34342558671878193;
+  }
+
+  function t715() external pure returns (uint256) {
+    return 52342392259021369;
+  }
+
+  function t815() external pure returns (uint256) {
+    return 79776409602255901;
+  }
+
+  function t915() external pure returns (uint256) {
+    return 121589313257458259;
+  }
+
+  function t1015() external pure returns (uint256) {
+    return 185317453770221528;
+  }
+
+  function t1115() external pure returns (uint256) {
+    return 282447180198804430;
+  }
+
+  function t1215() external pure returns (uint256) {
+    return 430485137687959592;
+  }
+
+  function t1315() external pure returns (uint256) {
+    return 656113662171395111;
+  }
+
+  function t1415() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
+
+  function t016() external pure returns (uint256) {
+    return 2739726027397260;
+  }
+
+  function t116() external pure returns (uint256) {
+    return 4060005854625059;
+  }
+
+  function t216() external pure returns (uint256) {
+    return 6016531351950262;
+  }
+
+  function t316() external pure returns (uint256) {
+    return 8915910667410451;
+  }
+
+  function t416() external pure returns (uint256) {
+    return 13212507070785166;
+  }
+
+  function t516() external pure returns (uint256) {
+    return 19579642462506911;
+  }
+
+  function t616() external pure returns (uint256) {
+    return 29015114005673871;
+  }
+
+  function t716() external pure returns (uint256) {
+    return 42997559448512061;
+  }
+
+  function t816() external pure returns (uint256) {
+    return 63718175229875027;
+  }
+
+  function t916() external pure returns (uint256) {
+    return 94424100034951094;
+  }
+
+  function t1016() external pure returns (uint256) {
+    return 139927275620255366;
+  }
+
+  function t1116() external pure returns (uint256) {
+    return 207358528757589475;
+  }
+
+  function t1216() external pure returns (uint256) {
+    return 307285046878222004;
+  }
+
+  function t1316() external pure returns (uint256) {
+    return 455366367617975795;
+  }
+
+  function t1416() external pure returns (uint256) {
+    return 674808393262840052;
+  }
+
+  function t1516() external pure returns (uint256) {
+    return 1000000000000000000;
+  }
 
   //////////////////////// END GENERATED CONSTANTS ////////////////////////
 
@@ -679,14 +1118,14 @@ contract TieredLiquidityDistributor {
 
   /// @notice Estimates the number of prizes that will be awarded.
   /// @return The estimated prize count
-  function estimatedPrizeCount() external view returns (uint32) {
+  function estimatedPrizeCount() external returns (uint32) {
     return _estimatedPrizeCount(numberOfTiers);
   }
 
   /// @notice Estimates the number of prizes that will be awarded given a number of tiers.
   /// @param numTiers The number of tiers
   /// @return The estimated prize count for the given number of tiers
-  function estimatedPrizeCount(uint8 numTiers) external pure returns (uint32) {
+  function estimatedPrizeCount(uint8 numTiers) external returns (uint32) {
     return _estimatedPrizeCount(numTiers);
   }
 
@@ -723,38 +1162,93 @@ contract TieredLiquidityDistributor {
     return _reserve;
   }
 
+  function generateEstimatedPrizeCountFunctionSignature(
+    uint8 numTiers
+  ) public returns (bytes memory) {
+    bytes memory signature;
+    if (numTiers >= 10) {
+      signature = new bytes(5);
+      signature[0] = bytes1(0x65); // e
+      signature[1] = bytes1(uint8(1));
+      signature[2] = bytes1(uint8(bytes1(uint8(bytes1(0x30)) + numTiers - 10)));
+      signature[3] = bytes1(uint8(bytes1(0x28))); // (
+      signature[4] = bytes1(uint8(bytes1(0x29))); // )
+    } else {
+      signature = new bytes(4);
+      signature[0] = bytes1(0x65); // e
+      signature[1] = bytes1(0x30 + numTiers);
+      signature[2] = bytes1(uint8(bytes1(0x28))); // (
+      signature[3] = bytes1(uint8(bytes1(0x29))); // )
+    }
+    console.log(string("e3()"));
+    console.log(string(signature));
+    console.logBytes("e3()");
+    console.logBytes(signature);
+    console.logBytes(abi.encodeWithSelector(bytes4(keccak256(signature))));
+    console.logBytes(abi.encodeWithSignature(string(signature)));
+    console.logBytes(abi.encodeWithSignature("e3()"));
+    console.logBytes4(this.e3.selector);
+    return abi.encodeWithSelector(bytes4(keccak256(signature)));
+  }
+
+  function generateEstimatedTierOddsFunctionSignature(
+    uint8 tier,
+    uint8 numTiers
+  ) public pure returns (bytes memory) {
+    bytes memory signature;
+    // signature[1] = bytes1(uint8(bytes1(0x30)) + tier + numTiers); // ASCII code for '0' + number
+    if (tier >= 10) {
+      if (numTiers >= 10) {
+        signature = new bytes(7);
+        signature[0] = bytes1(0x74); // ASCII code for 't'
+        signature[1] = bytes1(uint8(1));
+        signature[2] = bytes1(uint8(bytes1(uint8(bytes1(0x30)) + tier - 10)));
+        signature[3] = bytes1(uint8(1));
+        signature[4] = bytes1(uint8(uint8(bytes1(0x30)) + numTiers - 10));
+        signature[5] = bytes1(uint8(bytes1(0x28))); // (
+        signature[6] = bytes1(uint8(bytes1(0x29))); // )
+      } else {
+        signature = new bytes(6);
+        signature[0] = bytes1(0x74); // ASCII code for 't'
+        signature[1] = bytes1(uint8(1));
+        signature[2] = bytes1(uint8(bytes1(uint8(bytes1(0x30)) + tier - 10)));
+        signature[3] = bytes1(uint8(uint8(bytes1(0x30)) + numTiers));
+        signature[4] = bytes1(uint8(bytes1(0x28))); // (
+        signature[5] = bytes1(uint8(bytes1(0x29))); // )
+      }
+    } else {
+      if (numTiers >= 10) {
+        signature = new bytes(6);
+        signature[0] = bytes1(0x74); // ASCII code for 't'
+        signature[1] = bytes1(uint8(tier));
+        signature[2] = bytes1(uint8(1));
+        signature[3] = bytes1(uint8(uint8(bytes1(0x30)) + numTiers - 10));
+        signature[4] = bytes1(uint8(bytes1(0x28))); // (
+        signature[5] = bytes1(uint8(bytes1(uint8(bytes1(0x30)) + numTiers - 10))); // )
+      } else {
+        signature = new bytes(5);
+        signature[0] = bytes1(0x74); // ASCII code for 't'
+        signature[1] = bytes1(uint8(tier));
+        signature[2] = bytes1(uint8(uint8(bytes1(0x30)) + numTiers));
+        signature[3] = bytes1(uint8(bytes1(0x28))); // (
+        signature[4] = bytes1(uint8(bytes1(uint8(bytes1(0x30)) + numTiers - 10))); // )
+      }
+    }
+    console2.log("signature: %s", abi.decode(signature, (string)));
+    return abi.encodeWithSelector(bytes4(keccak256(signature)));
+  }
+
+  function callFunctionBySignature(bytes memory funcSignature) public returns (uint256) {
+    (bool success, bytes memory returnData) = address(this).staticcall(funcSignature);
+    require(success, "Function call failed.");
+    return abi.decode(returnData, (uint256));
+  }
+
   /// @notice Estimates the prize count for the given tier.
   /// @param numTiers The number of prize tiers
   /// @return The estimated total number of prizes
-  function _estimatedPrizeCount(uint8 numTiers) internal pure returns (uint32) {
-    if (numTiers == 3) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_2_TIERS;
-    } else if (numTiers == 4) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_3_TIERS;
-    } else if (numTiers == 5) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_4_TIERS;
-    } else if (numTiers == 6) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_5_TIERS;
-    } else if (numTiers == 7) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_6_TIERS;
-    } else if (numTiers == 8) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_7_TIERS;
-    } else if (numTiers == 9) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_8_TIERS;
-    } else if (numTiers == 10) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_9_TIERS;
-    } else if (numTiers == 11) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_10_TIERS;
-    } else if (numTiers == 12) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_11_TIERS;
-    } else if (numTiers == 13) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_12_TIERS;
-    } else if (numTiers == 14) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_13_TIERS;
-    } else if (numTiers == 15) {
-      return ESTIMATED_PRIZES_PER_DRAW_FOR_14_TIERS;
-    }
-    return 0;
+  function _estimatedPrizeCount(uint8 numTiers) internal returns (uint32) {
+    return uint32(callFunctionBySignature(generateEstimatedPrizeCountFunctionSignature(numTiers)));
   }
 
   /// @notice Computes the canary prize count for the given number of tiers
@@ -795,7 +1289,7 @@ contract TieredLiquidityDistributor {
   /// @param _tier The tier to compute odds for
   /// @param _numTiers The number of prize tiers
   /// @return The odds of the tier
-  function getTierOdds(uint8 _tier, uint8 _numTiers) external pure returns (SD59x18) {
+  function getTierOdds(uint8 _tier, uint8 _numTiers) external returns (SD59x18) {
     return _tierOdds(_tier, _numTiers);
   }
 
@@ -803,155 +1297,12 @@ contract TieredLiquidityDistributor {
   /// @param _tier The tier to compute odds for
   /// @param _numTiers The number of prize tiers
   /// @return The odds of the tier
-  function _tierOdds(uint8 _tier, uint8 _numTiers) internal pure returns (SD59x18) {
-    if (_numTiers == 3) {
-      if (_tier == 0) return TIER_ODDS_0_3;
-      else if (_tier == 1) return TIER_ODDS_1_3;
-      else if (_tier == 2) return TIER_ODDS_2_3;
-    } else if (_numTiers == 4) {
-      if (_tier == 0) return TIER_ODDS_0_4;
-      else if (_tier == 1) return TIER_ODDS_1_4;
-      else if (_tier == 2) return TIER_ODDS_2_4;
-      else if (_tier == 3) return TIER_ODDS_3_4;
-    } else if (_numTiers == 5) {
-      if (_tier == 0) return TIER_ODDS_0_5;
-      else if (_tier == 1) return TIER_ODDS_1_5;
-      else if (_tier == 2) return TIER_ODDS_2_5;
-      else if (_tier == 3) return TIER_ODDS_3_5;
-      else if (_tier == 4) return TIER_ODDS_4_5;
-    } else if (_numTiers == 6) {
-      if (_tier == 0) return TIER_ODDS_0_6;
-      else if (_tier == 1) return TIER_ODDS_1_6;
-      else if (_tier == 2) return TIER_ODDS_2_6;
-      else if (_tier == 3) return TIER_ODDS_3_6;
-      else if (_tier == 4) return TIER_ODDS_4_6;
-      else if (_tier == 5) return TIER_ODDS_5_6;
-    } else if (_numTiers == 7) {
-      if (_tier == 0) return TIER_ODDS_0_7;
-      else if (_tier == 1) return TIER_ODDS_1_7;
-      else if (_tier == 2) return TIER_ODDS_2_7;
-      else if (_tier == 3) return TIER_ODDS_3_7;
-      else if (_tier == 4) return TIER_ODDS_4_7;
-      else if (_tier == 5) return TIER_ODDS_5_7;
-      else if (_tier == 6) return TIER_ODDS_6_7;
-    } else if (_numTiers == 8) {
-      if (_tier == 0) return TIER_ODDS_0_8;
-      else if (_tier == 1) return TIER_ODDS_1_8;
-      else if (_tier == 2) return TIER_ODDS_2_8;
-      else if (_tier == 3) return TIER_ODDS_3_8;
-      else if (_tier == 4) return TIER_ODDS_4_8;
-      else if (_tier == 5) return TIER_ODDS_5_8;
-      else if (_tier == 6) return TIER_ODDS_6_8;
-      else if (_tier == 7) return TIER_ODDS_7_8;
-    } else if (_numTiers == 9) {
-      if (_tier == 0) return TIER_ODDS_0_9;
-      else if (_tier == 1) return TIER_ODDS_1_9;
-      else if (_tier == 2) return TIER_ODDS_2_9;
-      else if (_tier == 3) return TIER_ODDS_3_9;
-      else if (_tier == 4) return TIER_ODDS_4_9;
-      else if (_tier == 5) return TIER_ODDS_5_9;
-      else if (_tier == 6) return TIER_ODDS_6_9;
-      else if (_tier == 7) return TIER_ODDS_7_9;
-      else if (_tier == 8) return TIER_ODDS_8_9;
-    } else if (_numTiers == 10) {
-      if (_tier == 0) return TIER_ODDS_0_10;
-      else if (_tier == 1) return TIER_ODDS_1_10;
-      else if (_tier == 2) return TIER_ODDS_2_10;
-      else if (_tier == 3) return TIER_ODDS_3_10;
-      else if (_tier == 4) return TIER_ODDS_4_10;
-      else if (_tier == 5) return TIER_ODDS_5_10;
-      else if (_tier == 6) return TIER_ODDS_6_10;
-      else if (_tier == 7) return TIER_ODDS_7_10;
-      else if (_tier == 8) return TIER_ODDS_8_10;
-      else if (_tier == 9) return TIER_ODDS_9_10;
-    } else if (_numTiers == 11) {
-      if (_tier == 0) return TIER_ODDS_0_11;
-      else if (_tier == 1) return TIER_ODDS_1_11;
-      else if (_tier == 2) return TIER_ODDS_2_11;
-      else if (_tier == 3) return TIER_ODDS_3_11;
-      else if (_tier == 4) return TIER_ODDS_4_11;
-      else if (_tier == 5) return TIER_ODDS_5_11;
-      else if (_tier == 6) return TIER_ODDS_6_11;
-      else if (_tier == 7) return TIER_ODDS_7_11;
-      else if (_tier == 8) return TIER_ODDS_8_11;
-      else if (_tier == 9) return TIER_ODDS_9_11;
-      else if (_tier == 10) return TIER_ODDS_10_11;
-    } else if (_numTiers == 12) {
-      if (_tier == 0) return TIER_ODDS_0_12;
-      else if (_tier == 1) return TIER_ODDS_1_12;
-      else if (_tier == 2) return TIER_ODDS_2_12;
-      else if (_tier == 3) return TIER_ODDS_3_12;
-      else if (_tier == 4) return TIER_ODDS_4_12;
-      else if (_tier == 5) return TIER_ODDS_5_12;
-      else if (_tier == 6) return TIER_ODDS_6_12;
-      else if (_tier == 7) return TIER_ODDS_7_12;
-      else if (_tier == 8) return TIER_ODDS_8_12;
-      else if (_tier == 9) return TIER_ODDS_9_12;
-      else if (_tier == 10) return TIER_ODDS_10_12;
-      else if (_tier == 11) return TIER_ODDS_11_12;
-    } else if (_numTiers == 13) {
-      if (_tier == 0) return TIER_ODDS_0_13;
-      else if (_tier == 1) return TIER_ODDS_1_13;
-      else if (_tier == 2) return TIER_ODDS_2_13;
-      else if (_tier == 3) return TIER_ODDS_3_13;
-      else if (_tier == 4) return TIER_ODDS_4_13;
-      else if (_tier == 5) return TIER_ODDS_5_13;
-      else if (_tier == 6) return TIER_ODDS_6_13;
-      else if (_tier == 7) return TIER_ODDS_7_13;
-      else if (_tier == 8) return TIER_ODDS_8_13;
-      else if (_tier == 9) return TIER_ODDS_9_13;
-      else if (_tier == 10) return TIER_ODDS_10_13;
-      else if (_tier == 11) return TIER_ODDS_11_13;
-      else if (_tier == 12) return TIER_ODDS_12_13;
-    } else if (_numTiers == 14) {
-      if (_tier == 0) return TIER_ODDS_0_14;
-      else if (_tier == 1) return TIER_ODDS_1_14;
-      else if (_tier == 2) return TIER_ODDS_2_14;
-      else if (_tier == 3) return TIER_ODDS_3_14;
-      else if (_tier == 4) return TIER_ODDS_4_14;
-      else if (_tier == 5) return TIER_ODDS_5_14;
-      else if (_tier == 6) return TIER_ODDS_6_14;
-      else if (_tier == 7) return TIER_ODDS_7_14;
-      else if (_tier == 8) return TIER_ODDS_8_14;
-      else if (_tier == 9) return TIER_ODDS_9_14;
-      else if (_tier == 10) return TIER_ODDS_10_14;
-      else if (_tier == 11) return TIER_ODDS_11_14;
-      else if (_tier == 12) return TIER_ODDS_12_14;
-      else if (_tier == 13) return TIER_ODDS_13_14;
-    } else if (_numTiers == 15) {
-      if (_tier == 0) return TIER_ODDS_0_15;
-      else if (_tier == 1) return TIER_ODDS_1_15;
-      else if (_tier == 2) return TIER_ODDS_2_15;
-      else if (_tier == 3) return TIER_ODDS_3_15;
-      else if (_tier == 4) return TIER_ODDS_4_15;
-      else if (_tier == 5) return TIER_ODDS_5_15;
-      else if (_tier == 6) return TIER_ODDS_6_15;
-      else if (_tier == 7) return TIER_ODDS_7_15;
-      else if (_tier == 8) return TIER_ODDS_8_15;
-      else if (_tier == 9) return TIER_ODDS_9_15;
-      else if (_tier == 10) return TIER_ODDS_10_15;
-      else if (_tier == 11) return TIER_ODDS_11_15;
-      else if (_tier == 12) return TIER_ODDS_12_15;
-      else if (_tier == 13) return TIER_ODDS_13_15;
-      else if (_tier == 14) return TIER_ODDS_14_15;
-    } else if (_numTiers == 16) {
-      if (_tier == 0) return TIER_ODDS_0_16;
-      else if (_tier == 1) return TIER_ODDS_1_16;
-      else if (_tier == 2) return TIER_ODDS_2_16;
-      else if (_tier == 3) return TIER_ODDS_3_16;
-      else if (_tier == 4) return TIER_ODDS_4_16;
-      else if (_tier == 5) return TIER_ODDS_5_16;
-      else if (_tier == 6) return TIER_ODDS_6_16;
-      else if (_tier == 7) return TIER_ODDS_7_16;
-      else if (_tier == 8) return TIER_ODDS_8_16;
-      else if (_tier == 9) return TIER_ODDS_9_16;
-      else if (_tier == 10) return TIER_ODDS_10_16;
-      else if (_tier == 11) return TIER_ODDS_11_16;
-      else if (_tier == 12) return TIER_ODDS_12_16;
-      else if (_tier == 13) return TIER_ODDS_13_16;
-      else if (_tier == 14) return TIER_ODDS_14_16;
-      else if (_tier == 15) return TIER_ODDS_15_16;
-    }
-    return sd(0);
+  function _tierOdds(uint8 _tier, uint8 _numTiers) internal returns (SD59x18) {
+    return
+      SD59x18.wrap(
+        int256(
+          callFunctionBySignature(generateEstimatedTierOddsFunctionSignature(_tier, _numTiers))
+        )
+      );
   }
 }

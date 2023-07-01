@@ -539,7 +539,7 @@ contract PrizePool is TieredLiquidityDistributor {
 
   /// @notice Returns the
   /// @return The number of draws
-  function getTierAccrualDurationInDraws(uint8 _tier) external view returns (uint16) {
+  function getTierAccrualDurationInDraws(uint8 _tier) external returns (uint16) {
     return
       uint16(TierCalculationLib.estimatePrizeFrequencyInDraws(_tierOdds(_tier, numberOfTiers)));
   }
@@ -595,7 +595,7 @@ contract PrizePool is TieredLiquidityDistributor {
   /// @notice Returns the amount of tokens that will be added to the reserve when the open draw closes.
   /// @dev Intended for Draw manager to use after the draw has ended but not yet been closed.
   /// @return The amount of prize tokens that will be added to the reserve
-  function reserveForOpenDraw() external view returns (uint256) {
+  function reserveForOpenDraw() external returns (uint256) {
     uint8 _numTiers = numberOfTiers;
     uint8 _nextNumberOfTiers = _numTiers;
 
@@ -650,7 +650,7 @@ contract PrizePool is TieredLiquidityDistributor {
     address _user,
     uint8 _tier,
     uint32 _prizeIndex
-  ) external view returns (bool) {
+  ) external returns (bool) {
     (SD59x18 vaultPortion, SD59x18 tierOdds, uint16 drawDuration) = _computeVaultTierDetails(
       _vault,
       _tier,
@@ -667,7 +667,7 @@ contract PrizePool is TieredLiquidityDistributor {
    */
   function calculateTierTwabTimestamps(
     uint8 _tier
-  ) external view returns (uint64 startTimestamp, uint64 endTimestamp) {
+  ) external returns (uint64 startTimestamp, uint64 endTimestamp) {
     endTimestamp = _lastClosedDrawStartedAt + drawPeriodSeconds;
 
     startTimestamp = uint64(
@@ -749,7 +749,7 @@ contract PrizePool is TieredLiquidityDistributor {
   /// @notice Calculates the number of tiers for the next draw
   /// @param _numTiers The current number of tiers
   /// @return The number of tiers for the next draw
-  function _computeNextNumberOfTiers(uint8 _numTiers) internal view returns (uint8) {
+  function _computeNextNumberOfTiers(uint8 _numTiers) internal returns (uint8) {
     UD2x18 _claimExpansionThreshold = claimExpansionThreshold;
 
     uint8 _nextNumberOfTiers = largestTierClaimed + 2; // canary tier, then length
@@ -860,7 +860,7 @@ contract PrizePool is TieredLiquidityDistributor {
     uint8 _tier,
     uint8 _numberOfTiers,
     uint16 _lastClosedDrawId
-  ) internal view returns (SD59x18 vaultPortion, SD59x18 tierOdds, uint16 drawDuration) {
+  ) internal returns (SD59x18 vaultPortion, SD59x18 tierOdds, uint16 drawDuration) {
     if (_lastClosedDrawId == 0) {
       revert NoClosedDraw();
     }

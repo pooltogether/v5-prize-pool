@@ -207,4 +207,11 @@ contract TieredLiquidityDistributorTest is Test {
     summed += distributor.reserve();
     return summed;
   }
+
+  function testSignatureGeneration() public {
+    distributor.generateEstimatedPrizeCountFunctionSignature(2);
+    distributor.generateEstimatedPrizeCountFunctionSignature(9);
+    distributor.generateEstimatedPrizeCountFunctionSignature(10);
+    distributor.generateEstimatedPrizeCountFunctionSignature(16);
+  }
 }
