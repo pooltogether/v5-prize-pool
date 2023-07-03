@@ -20,7 +20,7 @@ contract GenerateConstants is Script {
     );
     console.log("\n");
 
-    console.log("/// @notice The estiamted number of prizes given X tiers.");
+    console.log("/// @notice The estimated number of prizes given X tiers.");
     uint8 MIN_TIERS = 2;
     uint8 MAX_TIERS = 14;
     // Precompute the prizes per draw
@@ -30,24 +30,6 @@ contract GenerateConstants is Script {
         uint256(numTiers),
         uint256(TierCalculationLib.estimatedClaimCount(numTiers, GRAND_PRIZE_PERIOD_DRAWS))
       );
-    }
-
-    console.log("\n");
-    console.log("/// @notice The odds for each tier and number of tiers pair.");
-    MIN_TIERS = 3;
-    MAX_TIERS = 16;
-    // Precompute the odds for each tier
-    for (uint8 numTiers = MIN_TIERS; numTiers <= MAX_TIERS; numTiers++) {
-      for (uint8 tier = 0; tier < numTiers; tier++) {
-        console.log(
-          "SD59x18 internal constant TIER_ODDS_%d_%d = SD59x18.wrap(%d);",
-          uint256(tier),
-          uint256(numTiers),
-          uint256(
-            SD59x18.unwrap(TierCalculationLib.getTierOdds(tier, numTiers, GRAND_PRIZE_PERIOD_DRAWS))
-          )
-        );
-      }
     }
   }
 }

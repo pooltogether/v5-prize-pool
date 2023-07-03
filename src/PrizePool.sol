@@ -92,6 +92,7 @@ error CallerNotDrawManager(address caller, address drawManager);
  * @param prizeToken The token to use for prizes
  * @param twabController The Twab Controller to retrieve time-weighted average balances from
  * @param drawManager The address of the draw manager for the prize pool
+ * @param grandPrizePeriodDraws The average number of draws between grand prizes. This determines the statistical frequency of grand prizes.
  * @param drawPeriodSeconds The number of seconds between draws. E.g. a Prize Pool with a daily draw should have a draw period of 86400 seconds.
  * @param firstDrawStartsAt The timestamp at which the first draw will start.
  * @param numberOfTiers The number of tiers to start with. Must be greater than or equal to the minimum number of tiers.
@@ -105,6 +106,7 @@ struct ConstructorParams {
   IERC20 prizeToken;
   TwabController twabController;
   address drawManager;
+  uint16 grandPrizePeriodDraws;
   uint32 drawPeriodSeconds;
   uint64 firstDrawStartsAt;
   uint8 numberOfTiers;
@@ -255,6 +257,7 @@ contract PrizePool is TieredLiquidityDistributor {
     ConstructorParams memory params
   )
     TieredLiquidityDistributor(
+      params.grandPrizePeriodDraws,
       params.numberOfTiers,
       params.tierShares,
       params.canaryShares,
@@ -542,7 +545,7 @@ contract PrizePool is TieredLiquidityDistributor {
   /// @return The number of draws
   function getTierAccrualDurationInDraws(uint8 _tier) external view returns (uint16) {
     return
-      uint16(TierCalculationLib.estimatePrizeFrequencyInDraws(_tierOdds(_tier, numberOfTiers)));
+      uint16(TierCalculationLib.estimatePrizeFrequencyInDraws(_tierOdds[numberOfTiers][_tier]));
   }
 
   /// @notice The total amount of prize tokens that have been claimed for all time
@@ -670,7 +673,7 @@ contract PrizePool is TieredLiquidityDistributor {
 
     startTimestamp = uint64(
       endTimestamp -
-        TierCalculationLib.estimatePrizeFrequencyInDraws(_tierOdds(_tier, numberOfTiers)) *
+        TierCalculationLib.estimatePrizeFrequencyInDraws(_tierOdds[numberOfTiers][_tier]) *
         drawPeriodSeconds
     );
   }
@@ -764,7 +767,7 @@ contract PrizePool is TieredLiquidityDistributor {
         ) &&
         claimCount >=
         fromUD60x18(
-          intoUD60x18(_claimExpansionThreshold).mul(toUD60x18(_estimatedPrizeCount(_numTiers)))
+          intoUD60x18(_claimExpansionThreshold).mul(toUD60x18(_estimatedPrizeCount[_numTiers]))
         )
       ) {
         // increase the number of tiers to include a new tier
@@ -866,7 +869,7 @@ contract PrizePool is TieredLiquidityDistributor {
       revert InvalidTier(_tier, _numberOfTiers);
     }
 
-    tierOdds = _tierOdds(_tier, numberOfTiers);
+    tierOdds = _tierOdds[numberOfTiers][_tier];
     drawDuration = uint16(TierCalculationLib.estimatePrizeFrequencyInDraws(tierOdds));
     vaultPortion = _getVaultPortion(
       _vault,

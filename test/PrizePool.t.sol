@@ -100,6 +100,7 @@ contract PrizePoolTest is Test {
       prizeToken,
       twabController,
       drawManager,
+      365,
       drawPeriodSeconds,
       lastCompletedDrawStartedAt,
       initialNumberOfTiers, // minimum number of tiers
@@ -459,6 +460,7 @@ contract PrizePoolTest is Test {
       prizeToken,
       twabController,
       address(this),
+      365,
       drawPeriodSeconds,
       lastCompletedDrawStartedAt,
       startingTiers, // higher number of tiers
@@ -999,9 +1001,6 @@ contract PrizePoolTest is Test {
 
   function testEstimatedPrizeCount() public {
     // assumes grand prize is 365
-    assertEq(prizePool.estimatedPrizeCount(0), 0);
-    assertEq(prizePool.estimatedPrizeCount(1), 0);
-    assertEq(prizePool.estimatedPrizeCount(2), 0);
     assertEq(prizePool.estimatedPrizeCount(3), 4);
     assertEq(prizePool.estimatedPrizeCount(4), 16);
     assertEq(prizePool.estimatedPrizeCount(5), 66);
@@ -1015,7 +1014,6 @@ contract PrizePoolTest is Test {
     assertEq(prizePool.estimatedPrizeCount(13), 4912619);
     assertEq(prizePool.estimatedPrizeCount(14), 19805536);
     assertEq(prizePool.estimatedPrizeCount(15), 79777187);
-    assertEq(prizePool.estimatedPrizeCount(16), 0);
   }
 
   function testcanaryPrizeCountFractional() public {

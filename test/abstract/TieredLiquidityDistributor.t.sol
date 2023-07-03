@@ -18,12 +18,14 @@ contract TieredLiquidityDistributorTest is Test {
   uint8 reserveShares;
 
   function setUp() external {
+    grandPrizePeriodDraws = 365;
     numberOfTiers = 3;
     tierShares = 100;
     canaryShares = 10;
     reserveShares = 10;
 
     distributor = new TieredLiquidityDistributorWrapper(
+      grandPrizePeriodDraws,
       numberOfTiers,
       tierShares,
       canaryShares,

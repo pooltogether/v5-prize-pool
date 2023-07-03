@@ -20,6 +20,7 @@ contract PrizePoolFuzzHarness is CommonBase {
 
   constructor() {
     address drawManager = address(this);
+    uint16 grandPrizePeriodDraws = 365;
     uint32 drawPeriodSeconds = 1 hours;
     uint64 nextDrawStartsAt = uint64(block.timestamp);
     uint8 numberOfTiers = 3;
@@ -38,6 +39,7 @@ contract PrizePoolFuzzHarness is CommonBase {
       token,
       twabController,
       drawManager,
+      grandPrizePeriodDraws,
       drawPeriodSeconds,
       nextDrawStartsAt,
       numberOfTiers,
